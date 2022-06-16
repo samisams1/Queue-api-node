@@ -22,6 +22,10 @@ app.use(cors(corsOptions));
 //var app = express();
 app.use(express.json());
 var http = require("http").createServer(app);
+
+app.get('/', (req, res) => {
+  res.send('Welcome To Our Queue System')
+})
 app.use(cors())
 const socketioJwt   = require('socketio-jwt');
 
@@ -58,6 +62,7 @@ require('./app/routes/window.routes')(app);
 require('./app/routes/service.route')(app);
 require('./app/routes/branch.route')(app);
 require('./app/routes/notificaton.route')(app);
+require('./app/routes/ticket.route')(app);
 function initial() {
   Role.create({
     id: 1,
