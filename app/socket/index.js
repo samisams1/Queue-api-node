@@ -82,17 +82,22 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
 //get ticket mobile
 socket.on("get_ticket", function (data) {
   // save message in database
-
+  serviceId = data;
+  console.log("sasaw");
+  console.log(data);
+  console.log("kebede");
   connection.query("SELECT * FROM tickets WHERE id =( SELECT MAX(id)  FROM tickets limit 1) ", function (error, rows) {
     // return data will be in JSON format
+   
     ticketNumber = rows[0].ticketNumber;
     newTicketNumber = ticketNumber + 1;
     console.log(rows[0].id);
     console.log(rows[0].ticketNumber);
-    connection.query("INSERT INTO tickets (ticketNumber,status,updatedBy,dedcatedWindow,createdDate,createdBy,windowNumber) VALUES ('" +newTicketNumber+ "','unCalled','5','"+28+"','"+today+"','"+data+"','wait')", function (error, result) {
+    connection.query("INSERT INTO tickets (ticketNumber,status,updatedBy,dedcatedWindow,createdDate,createdBy,windowNumber,serviceId) VALUES ('" +newTicketNumber+ "','unCalled','5','"+28+"','"+today+"','"+data+"','wait','"+serviceId+"')", function (error, result) {
       // server will send message to all connected clients
      id =  result.insertId;
       io.emit("get_ticket",  id,data);
+    
   });
 });
 
@@ -772,6 +777,15 @@ socket.on("customer_befor_you", function (id) {
       total_ticket = rows.length;
       socket.emit("customer_befor_you", total_ticket);
      // io.emit("Number_of_customer_before", total_ticket);
+  });
+  
+});
+
+//get available  queue in service
+socket.on("getService", function (serviceId) {
+  connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled'  AND serviceId = '"+serviceId+"' ", function (error, rows) {
+      service_queue = rows.length;
+      socket.emit("getService", getService);
   });
   
 });

@@ -1,8 +1,9 @@
-const { Sequelize } = require("../models");
+const { Sequelize, service } = require("../models");
 const db = require("../models");
 const sequelize = db.sequelize;
 const Ticket = db.ticket;
 const Branch = db.branch;
+const Service = db.service;
 
 exports.branchQueue = (req, res) => {
   Branch.findAll({
@@ -39,10 +40,16 @@ console.log(objectValue[0].id);
 
 
 exports.serviceQueue = (req, res) => {
-  Ticket.findAll({
-}).then(function(ticket){
+  const bId = req.body.branchId;
+  console.log("ras");
+  console.log(bId);
+  Service.findAll({
+    where: {
+      branchId: 1
+    }
+}).then(function(service){
  console.log("result");
-  res.send(JSON.stringify(ticket));
+  res.send(JSON.stringify(service));
 }).catch(function(err){
  console.log('Oops! something went wrong, : ', err);
 });

@@ -14,6 +14,6 @@ module.exports = function(app) {
     "/api/branchQueue",controller.branchQueue
   );
   app.get(
-    "/api/serviceQueue",controller.branchQueue
+    "/api/serviceQueue",controller.serviceQueue
   );
 };

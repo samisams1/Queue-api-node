@@ -5,6 +5,7 @@ const cors = require("cors");
 var SocketIO = require('./app/socket');
 var SocketIOR = require('./app/socket/report');
 var SocketIOAnAuthenticate = require('./app/socket/anAuthenticate');
+var jwt = require('jsonwebtoken');
 
 
 const app = express();
@@ -17,26 +18,21 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// database
+const db = require("./app/models");
+const Role = db.role;
+
+db.sequelize.sync();
 app.use(cors(corsOptions));
+var dateFormat = require('dateformat');
 
 //var app = express();
 app.use(express.json());
 var http = require("http").createServer(app);
-
-app.get('/', (req, res) => {
-  res.send('Welcome To Our Queue System')
-})
 app.use(cors())
-const socketioJwt   = require('socketio-jwt');
 
 const publicDirectory = path.join(__dirname,'./public');
 app.use(express.static(publicDirectory));
-console.log(__dirname);
-
-app.use(function (request, result, next) {
-    result.setHeader("Access-Control-Allow-Origin", "*");
-    next();
-});
 
 //app.use(cors());
 app.use(function (request, result, next) {
@@ -44,8 +40,13 @@ app.use(function (request, result, next) {
   next();
 });
 
-//
+app.get('/', (req, res) => {
+  res.send('Wellcome to Our System')
+})
+
+
 var io = require('socket.io')(http);
+
 SocketIO(io)
 SocketIOR(io)
 SocketIOAnAuthenticate(io)
@@ -61,8 +62,8 @@ require('./app/routes/report.routes')(app);
 require('./app/routes/window.routes')(app);
 require('./app/routes/service.route')(app);
 require('./app/routes/branch.route')(app);
-require('./app/routes/notificaton.route')(app);
 require('./app/routes/ticket.route')(app);
+require('./app/routes/notificaton.route')(app);
 function initial() {
   Role.create({
     id: 1,
