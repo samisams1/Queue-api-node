@@ -45,6 +45,10 @@ db.user.belongsToMany(db.role, {
   otherKey: "roleId"
 });
 db.branch.hasMany(db.service);
+db.branch.hasMany(db.ticket);
+db.service.hasMany(db.ticket);
+db.user.hasMany(db.ticket);
+
 //db.user.hasMany(ticket, {foreignKey: 'id'});
 //db.ticket.belongsTo(user, {foreignKey: 'updatedBy'});
 

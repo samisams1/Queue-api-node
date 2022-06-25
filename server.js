@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 var SocketIO = require('./app/socket');
 var SocketIOR = require('./app/socket/report');
+var SocketTicket = require('./app/socket/ticket');
 var SocketIOAnAuthenticate = require('./app/socket/anAuthenticate');
 var jwt = require('jsonwebtoken');
 
@@ -49,6 +50,7 @@ var io = require('socket.io')(http);
 
 SocketIO(io)
 SocketIOR(io)
+SocketTicket(io);
 SocketIOAnAuthenticate(io)
 
 var port = 8080;
@@ -69,12 +71,12 @@ function initial() {
     id: 1,
     name: "user"
   });
- 
+
   Role.create({
     id: 2,
     name: "moderator"
   });
- 
+
   Role.create({
     id: 3,
     name: "admin"

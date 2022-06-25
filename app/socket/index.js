@@ -12,7 +12,7 @@ var time=dateFormat(new Date(), "yyyy-mm-dd");
 const SocketIO = io => {
   //  const io = require('socket.io')();
     const jwt = require('jsonwebtoken');
- 
+
   io.use(function(socket, next){
       if (socket.handshake.query && socket.handshake.query.token){
         jwt.verify(socket.handshake.query.token, 'login_details', function(err, decoded) {
@@ -24,10 +24,10 @@ const SocketIO = io => {
       }
       else {
         next(new Error('Authentication error'));
-      }    
-    }) 
+      }
+    })
     io.on('connect', socket => {
-    
+
         socket.on('new-message22', function(newMessage) {
             io.emit('new-message22',{mesage:socket.username})
             console.log(newMessage)
@@ -39,7 +39,7 @@ const SocketIO = io => {
     let today = new Date().toISOString();
 
    // var day=dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
-   
+
     console.log("User connected", socket.id);
     //console.log('hello!', socket.handshake.decoded_token.name);
 
@@ -49,7 +49,7 @@ const SocketIO = io => {
         const currenttcket = 500;
         socket.emit('samisams',currenttcket);
       });
-   
+
     socket.on("insertNew",function(data){
       connection.query("INSERT INTO tickets (ticketNumber,status) VALUES ('44','unCalled')", function (error, result) {
     // server will send message to all connected clients
@@ -80,7 +80,7 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
 });
 
 //get ticket mobile
-socket.on("get_ticket", function (data) {
+/*socket.on("get_ticket", function (data) {
   // save message in database
   serviceId = data;
   console.log("sasaw");
@@ -88,7 +88,7 @@ socket.on("get_ticket", function (data) {
   console.log("kebede");
   connection.query("SELECT * FROM tickets WHERE id =( SELECT MAX(id)  FROM tickets limit 1) ", function (error, rows) {
     // return data will be in JSON format
-   
+
     ticketNumber = rows[0].ticketNumber;
     newTicketNumber = ticketNumber + 1;
     console.log(rows[0].id);
@@ -97,25 +97,25 @@ socket.on("get_ticket", function (data) {
       // server will send message to all connected clients
      id =  result.insertId;
       io.emit("get_ticket",  id,data);
-    
+
   });
 });
 
 
- 
-   
+
+
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
       // return data will be in JSON format
       total_ticket = rows.length;
       io.emit("total_Number_of_ticket", total_ticket);
   });
-  
-  });
+
+});*/
 
 socket.on("call_queue",function(userId){
   connection.query("SELECT  id,ticketNumber,updatedBy FROM tickets WHERE status='unCalled' LIMIT 1 ", function (error, rows) {
     // return data will be in JSON format
-    if(rows.length > 0){ 
+    if(rows.length > 0){
 var  id = rows[0].id;
 //var userId=  playMsg.userId;
 
@@ -140,9 +140,9 @@ var  id = rows[0].id;
          socket.join(userId);
          io.to(userId).emit("current_ticket", current_ticket);
       }
-      
+
   });
-  
+
   };
 });
 
@@ -152,7 +152,7 @@ socket.on("call_queue_again",function(userId){
     // return data will be in JSON format
   connection.query("SELECT  id,ticketNumber,updatedBy FROM tickets WHERE status='called'  ORDER BY id DESC LIMIT 1 ", function (error, rows) {
     // return data will be in JSON format
-    if(rows.length > 0){ 
+    if(rows.length > 0){
 var  id = rows[0].id;
 //var userId=  playMsg.userId;
 
@@ -177,7 +177,7 @@ var  id = rows[0].id;
          socket.join(userId);
          io.to(userId).emit("current_ticket", current_ticket);
       }
-      
+
   });
   };
 });
@@ -190,11 +190,11 @@ socket.on("play", function(playMsg) {
 // connection.query("SELECT  id FROM ticket WHERE status='unCalled' WHERE id > '"+465+"''ORDER BY id ASC LIMIT 1", function (error, rows) {
 
 
- 
+
 
 connection.query("SELECT  id,ticketNumber,updatedBy FROM tickets WHERE status='playing' LIMIT 1 ", function (error, rows) {
     // return data will be in JSON format
-    if(rows.length > 0){ 
+    if(rows.length > 0){
 var  id = rows[0].id;
 var data = rows[0].ticketNumber;
 var updatedBy = rows[0].updatedBy;
@@ -206,29 +206,29 @@ var timestamp = new Date().getTime();
 // io.emit("deleteTicket",id,data,audio);
     connection.query("UPDATE  tickets SET  status ='called' WHERE id = '" +id+ "'", function (error, result) {
         // send event to all users
-       
+
    //     io.emit("deleteTicket",id,data,audio);
     });
     //ticteNumber Audio
     connection.query("SELECT value,audioAdress FROM audioequivalents WHERE value='"+data+"' ORDER BY id DESC LIMIT 1", function (error, aodioRows) {
         // return data will be in JSON format
-        
+
         var audio = aodioRows[0].audioAdress;
        // io.emit("deleteTicket",id,data,audio);
-      
+
     });
 
     connection.query("SELECT value,audioAdress FROM audioequivalents WHERE value='"+updatedBy+"' ORDER BY id DESC LIMIT 1", function (error, windowRows) {
-          
+
     });
-   
+
     //total
     connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
         // return data will be in JSON format
         total_ticket = rows.length;
         io.emit("total_Number_of_ticket", total_ticket);
     });
-    
+
     connection.query("SELECT  ticketNumber FROM tickets WHERE status='called' ORDER BY id DESC LIMIT 7  ", function (error, rows) {
         // return data will be in JSON format
         total_ticket = rows.ticketNumber;
@@ -252,7 +252,7 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
     io.emit("total_Number_of_ticket", total_ticket);
 });
 
- //daily Served Queue 
+ //daily Served Queue
  connection.query("SELECT  id,ticketNumber,createdDate,updatedDate FROM tickets WHERE (status='called' AND updatedDate='"+today+"' ) ORDER BY id DESC ", function (error, rows) {
   if( rows.length>0){
      total = rows.length;
@@ -261,10 +261,10 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
      console.log(today)
      console.log("today")
   }
-    
+
  });
 
-}); 
+});
 ///////////////
 socket.on("stop",msg=>io.emit("stop"))
 
@@ -279,14 +279,14 @@ socket.on("play1", function(playMsg) {
       var audioNum = playMsg.current_ticket;
       var updatedBy = rows[0].updatedBy;
       var userId=  playMsg.userId
-      
+
       var date = new Date(), y = date.getFullYear(), m = date.getMonth();
       var firstDay = new Date(y, m, 1);
       var lastDay = new Date(y, m + 1, 0);
-      
+
       //console.log("samsi" + playMsg.userId)
       var timestamp = new Date().getTime();
-      
+
           //ticteNumber Audio
           connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='playing' ", function (error, rows) {
             // return data will be in JSON format
@@ -296,14 +296,14 @@ socket.on("play1", function(playMsg) {
         });
           connection.query("SELECT value,audioAdress FROM audioequivalents WHERE value='"+data+"' ORDER BY id DESC LIMIT 1", function (error, aodioRows) {
               var audioAdress = aodioRows[0].audioAdress;
-             // io.emit("play1",{name:"music two",path1:audioAdress}); 
+             // io.emit("play1",{name:"music two",path1:audioAdress});
               io.emit("play1", {
                 name: 'Gildo',path:audioAdress
                             });
-               
+
         console.log("best"+ audioAdress);
           })
-          // current ticket of all value 
+          // current ticket of all value
   connection.query("SELECT id,ticketNumber FROM tickets WHERE status='called ' ORDER BY id DESC LIMIT 1", function (error, rows) {
         // return data will be in JSON format
         if(rows.length >0){
@@ -312,10 +312,10 @@ socket.on("play1", function(playMsg) {
           current_ticket = rows[0].ticketNumber;
           io.emit("current_ticket", current_ticket);
           io.emit("current_ticket_from_all", current_ticket);
-  }else{  
+  }else{
     current_ticket = 0;
     io.emit("current_ticket_from_all", current_ticket);
-   
+
    }
     });
     }
@@ -324,7 +324,7 @@ socket.on("play1", function(playMsg) {
   });
 
 
-  }); 
+  });
   //stope audio 2
   socket.on("stop1",msg=>io.emit("stop1"))
 
@@ -339,7 +339,7 @@ socket.on("play1", function(playMsg) {
       socket.join(id);
       io.to(id).emit("current_ticket", current_ticket);
     });
-    
+
     connection.query("SELECT  id,ticketNumber,createdDate,updatedDate FROM tickets WHERE (status='called' AND updatedDate='"+today+"' ) ORDER BY id DESC ", function (error, rows) {
       if( rows.length>0){
          total = rows.length;
@@ -348,9 +348,9 @@ socket.on("play1", function(playMsg) {
          console.log(today)
          console.log("today")
       }});
-        
+
     io.emit("play2",playMsg);
-     
+
   });
     });
     // stope sound 3
@@ -367,20 +367,20 @@ socket.on("play1", function(playMsg) {
   console.log("username" + windowNumber);
   //console.log("samsi" + playMsg.userId)
   var timestamp = new Date().getTime();
-  
+
       //ticteNumber Audio
       connection.query("SELECT value,audioAdress FROM audioequivalents WHERE value='"+windowNumber+"' ORDER BY id DESC LIMIT 1", function (error, aodioRows) {
           var audioAdress = aodioRows[0].audioAdress;
-         // io.emit("play1",{name:"music two",path1:audioAdress}); 
+         // io.emit("play1",{name:"music two",path1:audioAdress});
           io.emit("play3", {
             name: 'Gildo',path:audioAdress
                         });
-           
+
     console.log("best"+ audioAdress);
       })
     });
-     
-    
+
+
     }); */
     //////////////////////////////
     socket.on("play3", function(playMsg) {
@@ -401,40 +401,40 @@ socket.on("play1", function(playMsg) {
   console.log("username" + windowNumber);
   //console.log("samsi" + playMsg.userId)
   var timestamp = new Date().getTime();
-  
+
       //ticteNumber Audio
       connection.query("SELECT value,audioAdress FROM audioequivalents WHERE value='"+windowNumber+"' ORDER BY id DESC LIMIT 1", function (error, aodioRows) {
           var audioAdress = aodioRows[0].audioAdress;
-         // io.emit("play1",{name:"music two",path1:audioAdress}); 
+         // io.emit("play1",{name:"music two",path1:audioAdress});
           io.emit("play3", {
             name: 'Gildo',path:audioAdress
                         });
-           
+
     console.log("best"+ audioAdress);
       })
     });
 
       });
-    
-    
-      }); 
+
+
+      });
     /////////////////////
     // stope sound 4
     socket.on("stop3",msg=>io.emit("stop3"))
      //play sound 5
   socket.on("play4", function(playMsg) {
     io.emit("play4",playMsg);
-     
-    
+
+
     });
     // stope sound 5
-    socket.on("stop4",msg=>io.emit("stop4")) 
+    socket.on("stop4",msg=>io.emit("stop4"))
 
-    
+
 //play sound
 socket.on("play",playMsg=>{
 io.emit("play",playMsg);
-}); 
+});
 
 
 socket.on("totalPlaying", function () {
@@ -443,7 +443,7 @@ socket.on("totalPlaying", function () {
       totalPlaying = rows.length;
       io.emit("totalPlaying", totalPlaying);
       console.log("mom" + totalPlaying);
-  }); 
+  });
 });
 
 // attach listener to server
@@ -453,7 +453,7 @@ socket.on("delete_message", function (messageId) {
         // send event to all users
         io.emit("delete_message", messageId);
     });
-    //current 
+    //current
     connection.query("SELECT MAX(id) id,ticketNumber FROM tickets WHERE status='called' ", function (error, rows) {
         // return data will be in JSON format
         current_ticket = rows[0].ticketNumber;
@@ -461,7 +461,7 @@ socket.on("delete_message", function (messageId) {
          socket.join(userId);
       io.to(userId).emit("current_ticket", current_ticket);
     });
-    
+
     // first ten
     connection.query("SELECT  ticketNumber,updetedBy FROM tickets WHERE status='unCalled' ORDER BY id DESC LIMIT 7  ", function (error, rows) {
         // return data will be in JSON format
@@ -479,7 +479,7 @@ socket.on("delete_message", function (messageId) {
 
    // current ticket number
    socket.on("current_ticket", function (userId) {
-   
+
     connection.query("SELECT id,ticketNumber FROM tickets WHERE status='called 'AND updatedBy='"+userId+"'  ORDER BY id DESC LIMIT 1", function (error, rows) {
         // return data will be in JSON format
         if(rows.length >0){
@@ -488,17 +488,17 @@ socket.on("delete_message", function (messageId) {
           current_ticket = rows[0].ticketNumber;
         //  io.emit("current_ticket", current_ticket);
           io.to(userId).emit("current_ticket", current_ticket);
-  }else{  
+  }else{
     current_ticket = 0;
     io.to(userId).emit("current_ticket", current_ticket);
-   
+
    }
     });
-    
-}); 
+
+});
 // currnt queue from all casher
  socket.on("current_ticket_from_all", function () {
-   
+
     connection.query("SELECT id,ticketNumber FROM tickets WHERE status='called ' ORDER BY id DESC LIMIT 1", function (error, rows) {
         // return data will be in JSON format
         if(rows.length >0){
@@ -507,13 +507,13 @@ socket.on("delete_message", function (messageId) {
           current_ticket = rows[0].ticketNumber;
         //  io.emit("current_ticket", current_ticket);
           io.emit("current_ticket_from_all", current_ticket);
-  }else{  
+  }else{
     current_ticket = 0;
     io.emit("current_ticket_from_all", current_ticket);
-   
+
    }
     });
-    
+
 });
 //current queeue
  // current ticket number
@@ -523,7 +523,7 @@ socket.on("delete_message", function (messageId) {
         current_ticket = rows[0].ticketNumber;
         io.emit("get_current_id", current_ticket);
     });
-    
+
 });  */
 
 
@@ -535,7 +535,7 @@ socket.on("total_Number_of_ticket", function (total_ticket) {
         socket.emit("total_Number_of_ticket", total_ticket);
         io.emit("Number_of_customer_before", total_ticket);
     });
-    
+
 });
 
  socket.on('message',(data)=>{
@@ -560,7 +560,7 @@ socket.on("totalDailyQueue", function (total_ticket) {
       total_ticket = rows.length;
       io.emit("totalDailyQueue", dailyQueue_ticket);
   });
-  
+
 });
 
 // total window number
@@ -570,7 +570,7 @@ socket.on("totalWindow", function (totalWindow) {
         totalWindow = rows.length;
         io.emit("totalWindow", totalWindow);
     });
-    
+
 });
 // current Window
 socket.on("specific_Window", function (myuserId) {
@@ -582,12 +582,12 @@ socket.on("specific_Window", function (myuserId) {
         window = rows[0].windowNumber;
         io.emit("specific_Window", window);
       // }
-       
+
     });
     }
 });
-  
-  
+
+
 });
 // Total Daily Queue All User
 socket.on("totalDailyQueueAllUser", function (daily_all_user_queue) {
@@ -600,39 +600,39 @@ socket.on("totalDailyQueueAllUser", function (daily_all_user_queue) {
         daily_all_user_queue = rows.length;
         io.emit("totalDailyQueueAllUser", daily_all_user_queue);
     });
-    
-}); 
+
+});
 // total ticket number of Month
 socket.on("totalMonthQueue", function (total_ticket) {
   var date = new Date(), y = date.getFullYear(), m = date.getMonth();
   var month = date.getUTCMonth() + 1;
   const year = date.getFullYear();
- // connection.query("SELECT   MONTH(updatedDate) AS  start_month,  id,updatedDate FROM ticket WHERE  status='called' 
-  
+ // connection.query("SELECT   MONTH(updatedDate) AS  start_month,  id,updatedDate FROM ticket WHERE  status='called'
+
  connection.query("SELECT updatedDate,status FROM tickets WHERE (year(updatedDate) = '"+year+"' AND status = 'called' AND month(updatedDate)='"+month+"') ",function (error, rows1) {
     // return data will be in JSON format
-    
+
     total_ticket = rows1.length;
     io.emit("totalMonthQueue", total_ticket);
     console.log(rows1)
 });
-  
-    
+
+
 });
 // total queue year  number
 socket.on("totalYearQueue", function (total_ticket) {
   var date = new Date(), y = date.getFullYear(), m = date.getMonth();
   var month = date.getUTCMonth() + 1;
   const year = date.getFullYear();
- // connection.query("SELECT   MONTH(updatedDate) AS  start_month,  id,updatedDate FROM ticket WHERE  status='called' 
-  
+ // connection.query("SELECT   MONTH(updatedDate) AS  start_month,  id,updatedDate FROM ticket WHERE  status='called'
+
   connection.query("SELECT updatedDate FROM tickets WHERE year(updatedDate) = '"+year+"' ",function (error, rows1) {
     // return data will be in JSON format
     total_ticket = rows1.length;
     io.emit("totalYearQueue", total_ticket);
     console.log(rows1)
 });
-    
+
 });
 
 
@@ -653,7 +653,7 @@ socket.on("total_Number_of_ticket_perYear", function (userId) {
      // io.emit("Number_of_customer_before", total_ticket);
  //   console.log(time + "miku" +monthTicket + "kebede" + firstDay +"presisdenr" + lastDay)
   });
-  
+
 });
 
 //yearly
@@ -667,7 +667,7 @@ socket.on("total_Number_of_ticket_perYear", function (userId) {
      // io.emit("Number_of_customer_before", total_ticket);
     console.log(time + "sams" +yearTicket)
   });
-  
+
 });
 //customer served admin
 socket.on("total_customer_served", function (userId) {
@@ -677,8 +677,8 @@ socket.on("total_customer_served", function (userId) {
       io.emit("total_customer_served", TotalServedCustomer);
     //  console.log("kebede" + userId)
   });
-  
-}); 
+
+});
 socket.on("customer_served", function (userId) {
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE (updatedBy = '"+userId+"' AND status='called' AND updatedDate='"+time+"' ) ", function (error, servedRows) {
 
@@ -693,9 +693,9 @@ socket.on("customer_served", function (userId) {
     console.log(time)
     console.log("today")
 
- 
+
    });
-  
+
 });
 //select first ten ticket number
 /*socket.on("first_ten_ticket", function (first_ten_ticket) {
@@ -706,7 +706,7 @@ socket.on("customer_served", function (userId) {
         io.emit("first_ten_ticket", first_ten_ticket,c1);
         console.log("tade")
     });
-    
+
 }); */
 //save socket window
 socket.on("save_window_number",function(data){
@@ -716,11 +716,11 @@ socket.on("save_window_number",function(data){
 io.emit("save_window_number",data);
 });
 });
- 
+
 function deleteMessage(self) {
     // get message id
     var id = self.getAttribute("data-id");
- 
+
     // send event to server
     io.emit("delete_message", id);
 }
@@ -736,19 +736,20 @@ socket.on("select_playing", function (select_playing) {
         select_playing=rows;
         io.emit("select_playing", select_playing);
     });
-    
+
 });
+
 //report
 /*socket.on("DailyQueue", function (DailyQueue) {
   connection.query("SELECT updatedBy,ticketNumber FROM ticket WHERE status='called' ORDER BY id DESC  ", function (error, rows) {
     total = rows.length;
       DailyQueue=rows;
       io.emit("DailyQueue", DailyQueue,total);
-  }); 
-   
+  });
+
 });*/
 
-
+/*
 socket.on("is_Ticket_Available", function (total_ticket) {
   console.log(total_ticket);
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' AND createdBy = '"+total_ticket+"' ", function (error, rows) {
@@ -760,7 +761,7 @@ socket.on("is_Ticket_Available", function (total_ticket) {
   });
 
 });
-
+*//*
 socket.on("list_all_ticket", function (data) {
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
       // return data will be in JSON format
@@ -769,8 +770,10 @@ socket.on("list_all_ticket", function (data) {
       console.log(data);
   });
 });
+*/
 //customer before You
 // total ticket number
+/*
 socket.on("customer_befor_you", function (id) {
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled'  AND createdBy < '"+id+"' ", function (error, rows) {
       // return data will be in JSON format
@@ -778,27 +781,21 @@ socket.on("customer_befor_you", function (id) {
       socket.emit("customer_befor_you", total_ticket);
      // io.emit("Number_of_customer_before", total_ticket);
   });
-  
-});
 
+});
+*/
 //get available  queue in service
+/*
 socket.on("getService", function (serviceId) {
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled'  AND serviceId = '"+serviceId+"' ", function (error, rows) {
       service_queue = rows.length;
       socket.emit("getService", getService);
   });
-  
-});
 
-socket.on('my_ticket',(id)=>{
-  console.log(id);
-  console.log("lalalalal");
-  console.log("hanitshisami");
-  connection.query("SELECT  id,ticketNumber,status,windowNumber,updatedBy,updatedAt FROM tickets WHERE status='unCalled'  AND createdBy='"+id+"' ", function (error, rows) {
-      data = rows;
-      socket.emit("my_ticket", data);
-  });
 });
+*/
+
+
 
 
 

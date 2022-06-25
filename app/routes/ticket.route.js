@@ -16,4 +16,7 @@ module.exports = function(app) {
   app.get(
     "/api/serviceQueue",controller.serviceQueue
   );
+  app.get(
+    "/api/myTicket",controller.myTicket
+  );
 };

@@ -1,8 +1,8 @@
 module.exports = (sequelize, Sequelize) => {
   const Ticket = sequelize.define("ticket", {
-    
+
       ticketNumber:{
-         type: Sequelize.STRING
+         type: Sequelize.INTEGER
        },
       status: {
         type: Sequelize.STRING
@@ -22,10 +22,16 @@ module.exports = (sequelize, Sequelize) => {
       windowNumber:{
         type:Sequelize.STRING
       },
+      ticket_before:{
+         type: Sequelize.INTEGER
+      },
       updatedBy:{
         type:Sequelize.STRING
       },
-     
+      cratedBy:{
+        type:Sequelize.STRING
+      },
+
     });
 
 
