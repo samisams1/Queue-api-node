@@ -20,17 +20,17 @@ const SocketIOR = io => {
           console.log("samson mamushet"+socket.handshake.query.username)
           next();
         });
-      } 
+      }
       else {
         next(new Error('Authentication error'));
-      }    
+      }
     })*/
     io.on('connection', socket => {
-    
+
         socket.on("DailyQueue", function (DailyQueue,userId) {
-         userId =    socket.handshake.query.userId 
-            console.log("sew")
-            console.log()
+         userId =    socket.handshake.query.userId
+        //    console.log("sew")
+        //    console.log()
             connection.query("SELECT  id,ticketNumber,createdDate,updatedDate FROM tickets WHERE (status='called' AND updatedDate='"+today+"' AND updatedBy = '"+userId+"' ) ORDER BY id DESC ", function (error, rows) {
              if( rows.length>0){
                 total = rows.length;
@@ -39,13 +39,13 @@ const SocketIOR = io => {
 
                 socket.join(userId);
                 io.to(userId).emit("DailyQueue", DailyQueue,total);
-               
+
              }
-               
+
             });
 
-            
-            
+
+
           });
           socket.on("first_ten_ticket", function (first_ten_ticket) {
             connection.query("SELECT updatedBy,ticketNumber FROM tickets WHERE status='called' ORDER BY id DESC LIMIT 7  ", function (error, rows) {
@@ -55,10 +55,10 @@ const SocketIOR = io => {
                 io.emit("first_ten_ticket", first_ten_ticket,c1);
                 console.log("tade")
             });
-            
+
         });
 
-          
+
     });
 }
 module.exports = SocketIOR

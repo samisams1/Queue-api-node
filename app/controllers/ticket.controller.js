@@ -13,14 +13,15 @@ exports.branchQueue = (req, res) => {
                SELECT COUNT(*)
                FROM tickets
                WHERE
-                   tickets.branchId = branchs.id
+                   tickets.branchId = branchs.id AND  tickets.status = 'unCalled' 
            )`),
          'count']
        ],
+
 }).then(function(ticket){
 
 
-  console.log("result");
+//  console.log("result");
   res=  res.send(JSON.stringify(ticket));
 
   var sams = JSON.stringify(ticket);

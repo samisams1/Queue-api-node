@@ -1,3 +1,4 @@
+
 const { verifyToken } = require('../authenticate')
 var mysql = require("mysql");
 var connection = mysql.createConnection({
@@ -7,22 +8,12 @@ var connection = mysql.createConnection({
   //  database: process.env.DATABASE
   database: "queedb"
 });
-
-
-//const { Sequelize, service } = require("../models");
-// const {Sequelize,service} = require
 var Sequelize = require('sequelize');
 const db = require("../models");
 const sequelize = db.sequelize;
 const Ticket = db.ticket;
 const Branch = db.branch;
 const Service = db.service;
-
-
-
-
-
-
 
 var dateFormat = require('dateformat');
 var today=dateFormat(new Date(), "yyyy-mm-dd");
@@ -48,124 +39,59 @@ const SocketIOTicket = io => {
     serviceId = data.serviceId;
     branchId = data.branchId;
     id = data.id;
-
-    Ticket.findAndCountAll()
-.then(result => {
-    console.log(result.count);
-  //  console.log(result.rows);
-  if(result.count >0){
     connection.query("SELECT * FROM tickets WHERE id =( SELECT MAX(id)  FROM tickets limit 1) ", function (error, rows) {
-      ticketNumber = rows[0].ticketNumber;
-      newTicketNumber = ticketNumber + 1;
-  //    console.log(rows[0].id);
-    //  console.log(rows[0].ticketNumber);
-
-      //get before
-
-      connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled'    ", function (error, rows) {
-          // return data will be in JSON format
-          if( rows.length > 0){
-            total_ticket = rows.length;
-            console.log(total_ticket);
-            console.log("welega");
-
-            const tickt =  Ticket.create({
-              ticketNumber:newTicketNumber,
-              status:"unCalled",
-              updatedBy:0,
-              dedcatedWindow:0,
-              createdDate:today,
-              cratedBy:id,
-              windowNumber:'wait',
-              branchId:branchId,
-              serviceId:serviceId,
-              ticket_before:rows.length,
-        });
-
-   socket.emit("customer_befor_you", total_ticket);
-          //  socket.emit("customer_befor_you", total_ticket);
-           // io.emit("Number_of_customer_before", total_ticket);
-         }else{
-           total_ticket = 0;
-           socket.emit("customer_befor_you", total_ticket);
-         }
-
-      });
-
-
-
-  Ticket.findAndCountAll()
-.then(result => {
-  console.log(result.count);
-//  console.log(result.rows);
-if(result.count >0){
-  total_ticket = result.count;
+if(rows.length >0){
+  ticketNumber = rows[0].ticketNumber;
+  newTicketNumber = ticketNumber + 1;
+  //get before
+  connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled'    ", function (error, rows) {
+      // return data will be in JSON format
+       total_ticket = rows.length;
+        socket.emit("total_Number_of_ticket", total_ticket);
+        console.log(total_ticket);
+          console.log("baleder");
+      if( rows.length > 0){
+        total_ticket = rows.length;
+        console.log(total_ticket);
+connection.query("INSERT INTO tickets (ticketNumber,status,updatedBy,dedcatedWindow,createdDate,cratedBy,windowNumber,branchId,serviceId,ticket_before) VALUES ('"+newTicketNumber+"','unCalled',0,0,'"+today+"','"+id+"','wait','"+branchId+"','"+serviceId+"','"+rows.length+"')", function (error, result) {
+socket.emit("customer_befor_you", total_ticket);
+ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
+  total_ticket = rows.length;
+  console.log(total_ticket);
   io.emit("total_Number_of_ticket", total_ticket);
+ });
+});
 }
 });
+}else{
+  connection.query("INSERT INTO tickets (ticketNumber,status) VALUES ('0','Called')", function (error, rows) {
+    console.log(rows.length);
+   });
+}
 });
-  }
-    else{
-  const newTicketNumber = 1;
-          const tickt =  Ticket.create({
-            ticketNumber:newTicketNumber,
-            status:"unCalled",
-            updatedBy:0,
-            dedcatedWindow:0,
-            createdDate:today,
-            cratedBy:id,
-            windowNumber:'wait',
-            branchId:branchId,
-            serviceId:serviceId,
-            ticket_before:1,
-      });
-    }
-})
-.catch(err => {
-    throw err;
-});
+
 });
 
 //start get ticket listen
 socket.on('my_ticket',(id)=>{
   console.log(id);
-  console.log("lalalalal");
-  console.log("hanitshisami");
-  connection.query("SELECT  * FROM tickets WHERE cratedBy='"+id+"'   ORDER BY ticket_before ASC ", function (error, rows) {
+  connection.query("SELECT  * FROM tickets where status='unCalled'  ", function (error, rows) {
       data = rows;
       socket.emit("my_ticket", data);
-      console.log(data);
+    //  console.log(data);
   });
 });
 //end get ticket
 //start get Service by branchId
 socket.on('service_by_branch_id',(branchId)=>{
-/*  console.log(branchId);
-  console.log("lalalalal");
-  console.log("hanitshisami");
-  connection.query("SELECT  * FROM tickets WHERE branchId='"+branchId+"' ", function (error, rows) {
-      data = rows;
-      socket.emit("service_by_branch_id", data);
-  });
-
-  */
-  //  const branchId = req.params.branchId;
-  //const  branchId=  req.params.branchId;
-  //const  branchId = req.params.branchId;
-
-  //var branchId = JSON.parse(req.params.branchId);
-  //  console.log("branchId");
-//  console.log(branchId);
-//  console.log("shimelis");
     Service.findAll({
-
-     attributes: [
+      attributes: [
          'id','value',
          [Sequelize.literal(`(
                  SELECT COUNT(*)
                  FROM tickets
                  WHERE
-                     tickets.serviceId = services.id
+                     tickets.serviceId = services.id AND  tickets.status = 'unCalled'
              )`),
            'count']
          ],
@@ -173,18 +99,10 @@ socket.on('service_by_branch_id',(branchId)=>{
             branchId:branchId
          }
   }).then(function(ticket){
-    //  console.log("branchId");
-  //  console.log(branchId);
-  //  console.log("shimelis");
-  //  res=  res.send(JSON.stringify(ticket));
   var data = ticket;
   socket.emit("service_by_branch_id", data);
     var data = JSON.stringify(ticket);
-//console.log(data);
-  //  var objectValue = JSON.parse(data);
-//  console.log(objectValue[0].id);
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
-    // return data will be in JSON format
     total_ticket = rows.length;
     io.emit("total_Number_of_ticket", total_ticket);
 });
@@ -194,47 +112,6 @@ socket.on('service_by_branch_id',(branchId)=>{
   });
 
 });
-//end get ticket
-/*  socket.on("get_ticket", function (data) {
-    serviceId = data.serviceId;
-    id= data.id;
-    connection.query("SELECT * FROM tickets WHERE id =( SELECT MAX(id)  FROM tickets limit 1) ", function (error, rows) {
-
-      if(rows.length>0){
-      // return data will be in JSON format
-      ticketNumber = rows[0].ticketNumber;
-      newTicketNumber = ticketNumber + 1;
-      console.log(rows[0].id);
-      console.log(rows[0].ticketNumber);
-      connection.query("INSERT INTO tickets (ticketNumber,status,updatedBy,dedcatedWindow,createdDate,createdBy,windowNumber,serviceId) VALUES ('" +newTicketNumber+ "','unCalled','5','"+28+"','"+today+"','"+data+"','wait','"+serviceId+"')", function (error, result) {
-        // server will send message to all connected clients
-       id =  result.insertId;
-        io.emit("get_ticket",  id,data);
-
-        connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
-          // return data will be in JSON format
-          total_ticket = rows.length;
-          io.emit("total_Number_of_ticket", total_ticket);
-      });
-
-    });
-  }
-  });
-    connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
-        // return data will be in JSON format
-        if(rows.length > 0){
-          total_ticket = rows.length;
-          io.emit("total_Number_of_ticket", total_ticket);
-        }else {
-          total_ticket = 0;
-          io.emit("total_Number_of_ticket", total_ticket);
-
-        }
-
-    });
-
-  });*/
-    // end
     // start
     socket.on("is_Ticket_Available", function (id) {
     /*  connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' AND createdBy = '"+id+"' ", function (error, rows) {
@@ -272,30 +149,40 @@ socket.on('service_by_branch_id',(branchId)=>{
       });
 
     });
-
-
     //end ticket
-    //startFre
-
-
+    //customerbefor you
     socket.on("customer_befor_you", function (id) {
       console.log(id);
-      connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' AND   id < '"+id+"'    ", function (error, rows) {
-          // return data will be in JSON format
-          if( rows.lenFgth > 0){
-            total_ticket = rows.length;
+      connection.query("SELECT branchId,serviceId FROM tickets WHERE id = '"+id+"'    ", function (error, rows) {
+           if( rows.length > 0){
+             total_ticket = rows.length;
+              var  branchId= rows[0].branchId;
+              var  serviceId=     rows[0].serviceId;
+
+              connection.query("SELECT  id,ticketNumber FROM tickets WHERE   serviceId = '"+serviceId+"' AND branchId = '"+branchId+"' AND status='unCalled' AND   id < '"+id+"'    ", function (error, rows) {
+                    // return data will be in JSON format
+                    if( rows.length > 0){
+                      total_ticket = rows.length;
+                      socket.emit("customer_befor_you", total_ticket);
+                     // io.emit("Number_of_customer_before", total_ticket);
+                   }else{
+                     total_ticket = 0;
+                     socket.emit("customer_befor_you", total_ticket);
+                   }
+
+                });
+
+          }else{
+            total_ticket = 0;
             socket.emit("customer_befor_you", total_ticket);
-           // io.emit("Number_of_customer_before", total_ticket);
-         }else{
-           total_ticket = 0;
-           socket.emit("customer_befor_you", total_ticket);
-         }
+          }
 
-      });
-
+       });
     });
     //end
 
     });
 }
 module.exports = SocketIOTicket;
+
+  //  res=  res.send(JSON.stringify(ticket));

@@ -4,21 +4,18 @@ var connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "",
-  //  database: process.env.DATABASE
   database: "queedb"
 });
 var dateFormat = require('dateformat');
 var time=dateFormat(new Date(), "yyyy-mm-dd");
 const SocketIO = io => {
-  //  const io = require('socket.io')();
-    const jwt = require('jsonwebtoken');
-
+  const jwt = require('jsonwebtoken');
   io.use(function(socket, next){
       if (socket.handshake.query && socket.handshake.query.token){
         jwt.verify(socket.handshake.query.token, 'login_details', function(err, decoded) {
           if (err) return next(new Error('Authentication error'));
           socket.decoded = decoded;
-          console.log("samson mamushet"+socket.handshake.query.username)
+      //    console.log("samson mamushet"+socket.handshake.query.username)
           next();
         });
       }
@@ -30,8 +27,8 @@ const SocketIO = io => {
 
         socket.on('new-message22', function(newMessage) {
             io.emit('new-message22',{mesage:socket.username})
-            console.log(newMessage)
-            console.log(socket.username)
+        //    console.log(newMessage)
+          //  console.log(socket.username)
         });
 
         //start old
@@ -40,10 +37,10 @@ const SocketIO = io => {
 
    // var day=dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
 
-    console.log("User connected", socket.id);
+    //console.log("User connected", socket.id);
     //console.log('hello!', socket.handshake.decoded_token.name);
 
-    socket.on('message',(data)=>{
+/*    socket.on('message',(data)=>{
         console.log(data);
         console.log("sasaw");
         const currenttcket = 500;
@@ -61,6 +58,8 @@ const SocketIO = io => {
 
 
 });
+*/
+/*
 socket.on("new_message", function (data,dedicateId) {
 console.log("Client says", data);
 
@@ -78,7 +77,7 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
 });
 
 });
-
+*/
 //get ticket mobile
 /*socket.on("get_ticket", function (data) {
   // save message in database
@@ -100,10 +99,6 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
 
   });
 });
-
-
-
-
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
       // return data will be in JSON format
       total_ticket = rows.length;
@@ -119,7 +114,7 @@ socket.on("call_queue",function(userId){
 var  id = rows[0].id;
 //var userId=  playMsg.userId;
 
-    connection.query("UPDATE  tickets SET  status ='playing',updatedBy= '"+userId+"',updatedDate ='"+time+"'  WHERE id = '" +id+ "'", function (error, result) {
+    connection.query("UPDATE  tickets SET  status ='playing',updatedBy= '"+userId+"', windowNumber = '"+1+"', updatedDate ='"+time+"'  WHERE id = '" +id+ "'", function (error, result) {
       connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='playing' ", function (error, rows) {
         // return data will be in JSON format
         totalPlaying = rows.length;
@@ -131,7 +126,7 @@ var  id = rows[0].id;
      connection.query("SELECT id,ticketNumber FROM tickets WHERE status='called' ORDER BY id DESC LIMIT 1", function (error, rows) {
       // return data will be in JSON format
       if(rows.length >0){
-        current_ticket = rows[0].ticketNumber;
+        current_ticket = rows[0].ticketNumbe;
         // io.emit("current_ticket", current_ticket);
          socket.join(userId);
          io.to(userId).emit("current_ticket", current_ticket);
@@ -147,6 +142,7 @@ var  id = rows[0].id;
 });
 
 });
+
 //
 socket.on("call_queue_again",function(userId){
     // return data will be in JSON format
@@ -188,10 +184,6 @@ var  id = rows[0].id;
 socket.on("play", function(playMsg) {
 // delete from database
 // connection.query("SELECT  id FROM ticket WHERE status='unCalled' WHERE id > '"+465+"''ORDER BY id ASC LIMIT 1", function (error, rows) {
-
-
-
-
 connection.query("SELECT  id,ticketNumber,updatedBy FROM tickets WHERE status='playing' LIMIT 1 ", function (error, rows) {
     // return data will be in JSON format
     if(rows.length > 0){
@@ -247,11 +239,9 @@ connection.query("SELECT  ticketNumber,updatedBy FROM tickets WHERE status='call
 
 // Daily total
 connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' ", function (error, rows) {
-    // return data will be in JSON format
     total_ticket = rows.length;
     io.emit("total_Number_of_ticket", total_ticket);
 });
-
  //daily Served Queue
  connection.query("SELECT  id,ticketNumber,createdDate,updatedDate FROM tickets WHERE (status='called' AND updatedDate='"+today+"' ) ORDER BY id DESC ", function (error, rows) {
   if( rows.length>0){
@@ -265,7 +255,7 @@ connection.query("SELECT  id,ticketNumber FROM tickets WHERE status='unCalled' "
  });
 
 });
-///////////////
+//daily served
 socket.on("stop",msg=>io.emit("stop"))
 
 //start audio 2
@@ -298,7 +288,7 @@ socket.on("play1", function(playMsg) {
               var audioAdress = aodioRows[0].audioAdress;
              // io.emit("play1",{name:"music two",path1:audioAdress});
               io.emit("play1", {
-                name: 'Gildo',path:audioAdress
+                name: 'play1',path:audioAdress
                             });
 
         console.log("best"+ audioAdress);
@@ -312,6 +302,38 @@ socket.on("play1", function(playMsg) {
           current_ticket = rows[0].ticketNumber;
           io.emit("current_ticket", current_ticket);
           io.emit("current_ticket_from_all", current_ticket);
+      //start customer before for diatal ticket
+      console.log("tizita ");
+      /*  console.log(id);
+      connection.query("SELECT branchId,serviceId FROM tickets WHERE id = '"+id+"'    ", function (error, rows) {
+           if( rows.length > 0){
+                console.log("branchId");
+             console.log( rows[0].branchId);
+             total_ticket = rows.length;
+              var  branchId= rows[0].branchId;
+              var  serviceId=     rows[0].serviceId;
+
+              connection.query("SELECT  id,ticketNumber FROM tickets WHERE   serviceId = '"+serviceId+"' AND branchId = '"+branchId+"' AND status='unCalled' AND   id < '"+id+"'    ", function (error, rows) {
+                    // return data will be in JSON format
+                    if( rows.length > 0){
+                      total_ticket = rows.length;
+                      socket.emit("customer_befor_you", total_ticket);
+                     // io.emit("Number_of_customer_before", total_ticket);
+                   }else{
+                     total_ticket = 0;
+                     socket.emit("customer_befor_you", total_ticket);
+                   }
+
+                });
+
+          }else{
+            total_ticket = 0;
+            socket.emit("customer_befor_you", total_ticket);
+          }
+
+       });*/
+      //start customer before for detail ticket
+
   }else{
     current_ticket = 0;
     io.emit("current_ticket_from_all", current_ticket);
@@ -332,12 +354,23 @@ socket.on("play1", function(playMsg) {
   socket.on("play2", function(playMsg) {
     connection.query("SELECT  id,ticketNumber,updatedBy FROM tickets WHERE status='called' ORDER BY id DESC LIMIT 1 ", function (error, rows) {
     var  id = rows[0].updatedBy;
+    console.log("kalsi");
+      console.log(id);
+      console.log("kalsi");
     connection.query("SELECT id,ticketNumber FROM tickets WHERE status='called' ORDER BY id DESC LIMIT 1", function (error, rows) {
       // return data will be in JSON format
       current_ticket = rows[0].ticketNumber;
      // io.emit("current_ticket", current_ticket);
       socket.join(id);
       io.to(id).emit("current_ticket", current_ticket);
+   //customer before you start
+      connection.query("SELECT * FROM tickets WHERE branchId = '"+1+"' AND serviceId = '"+1+"'  AND status='unCalled'  ", function (error, resualtcby) {
+        total_ticket  = resualtcby.length;
+        console.log("mamuya");
+        console.log(total_ticket);
+        io.emit("customer_befor_you", total_ticket);
+      });
+   //customer before you start
     });
 
     connection.query("SELECT  id,ticketNumber,createdDate,updatedDate FROM tickets WHERE (status='called' AND updatedDate='"+today+"' ) ORDER BY id DESC ", function (error, rows) {
@@ -352,6 +385,12 @@ socket.on("play1", function(playMsg) {
     io.emit("play2",playMsg);
 
   });
+    connection.query("SELECT * FROM tickets WHERE status = 'unCalled'    ", function (error, rows) {
+      console.log("samisams kidis");
+      console.log(rows.length);
+      var  id = rows[0].id;
+      console.log(id);
+    });
     });
     // stope sound 3
     socket.on("stop2",msg=>io.emit("stop2"))
@@ -638,14 +677,6 @@ socket.on("totalYearQueue", function (total_ticket) {
 
 
 socket.on("total_Number_of_ticket_perYear", function (userId) {
-  //const date = new Date();
-
- // var date = new Date();
- // var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-
-  //var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE(updatedDate between '2021-07-01' and   '"+time+"' AND status='called'  AND updatedBy = '"+userId+"' )", function (error, rows) {
       // return data will be in JSON format
       monthTicket = rows.length;
@@ -681,8 +712,6 @@ socket.on("total_customer_served", function (userId) {
 });
 socket.on("customer_served", function (userId) {
   connection.query("SELECT  id,ticketNumber FROM tickets WHERE (updatedBy = '"+userId+"' AND status='called' AND updatedDate='"+time+"' ) ", function (error, servedRows) {
-
-
        // return data will be in JSON format
       if (servedRows.length > 0) {}
       servedCustomer = servedRows.length;
@@ -709,14 +738,14 @@ socket.on("customer_served", function (userId) {
 
 }); */
 //save socket window
-socket.on("save_window_number",function(data){
+/*socket.on("save_window_number",function(data){
   connection.query("INSERT INTO windownumbers (windowNumber) VALUES ('"+data+"')", function (error, result) {
 // server will send message to all connected clients
 //id =  result.insertId;
 io.emit("save_window_number",data);
 });
 });
-
+*/
 function deleteMessage(self) {
     // get message id
     var id = self.getAttribute("data-id");
@@ -802,11 +831,11 @@ socket.on("getService", function (serviceId) {
 
 socket.on('disconnect',()=>{
   io.emit('message','A user has left the chat');
-  console.log("disconnet")
+//  console.log("disconnet")
 })
         //end old
-        console.log('Connnected To Socket')
-        socket.on('disconnect', () => console.log('Socket Disconnected'))
+      //  console.log('Connnected To Socket')
+        socket.on('disconnect', () => console.log('Disconnected'))
     })
 }
 
